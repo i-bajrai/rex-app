@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Domain\Contact\Actions;
 
 use App\Models\Contact;
+use Domain\Contact\Exceptions\ContactNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 final class DeleteContact
@@ -14,9 +15,7 @@ final class DeleteContact
         DB::transaction(function () use ($id): void {
             $contact = Contact::query()->find($id);
 
-            if ($contact === null) {
-                return;
-            }
+            throw_if($contact === null, ContactNotFoundException::class, $id);
 
             $contact->delete();
         });

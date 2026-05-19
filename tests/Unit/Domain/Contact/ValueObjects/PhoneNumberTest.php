@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Domain\Contact\Exceptions\InvalidPhoneNumberException;
 use Domain\Contact\ValueObjects\PhoneNumber;
+use Pest\Expectation;
 
 test('accepts a valid Australian mobile number', function (): void {
     $phone = new PhoneNumber('+61412345678');
@@ -34,49 +35,29 @@ test('accepts a valid New Zealand landline number', function (): void {
 });
 
 test('rejects a number without the leading plus', function (): void {
-    try {
-        new PhoneNumber('0412345678');
-        $this->fail('expected InvalidPhoneNumberException');
-    } catch (InvalidPhoneNumberException $invalidPhoneNumberException) {
-        expect($invalidPhoneNumberException->errorCode)->toBe('not_e164');
-    }
+    expect(fn (): PhoneNumber => new PhoneNumber('0412345678'))
+        ->toThrow(fn (InvalidPhoneNumberException $e): Expectation => expect($e->errorCode)->toBe('not_e164'));
 });
 
 test('rejects a US country code', function (): void {
-    try {
-        new PhoneNumber('+14155551234');
-        $this->fail('expected InvalidPhoneNumberException');
-    } catch (InvalidPhoneNumberException $invalidPhoneNumberException) {
-        expect($invalidPhoneNumberException->errorCode)->toBe('unsupported_region')
-            ->and($invalidPhoneNumberException->supportedRegions)->toBe(['AU', 'NZ']);
-    }
+    expect(fn (): PhoneNumber => new PhoneNumber('+14155551234'))
+        ->toThrow(fn (InvalidPhoneNumberException $e): Expectation => expect($e->errorCode)->toBe('unsupported_region')
+            ->and($e->supportedRegions)->toBe(['AU', 'NZ']));
 });
 
 test('rejects a number that is too short for AU/NZ', function (): void {
-    try {
-        new PhoneNumber('+6112345');
-        $this->fail('expected InvalidPhoneNumberException');
-    } catch (InvalidPhoneNumberException $invalidPhoneNumberException) {
-        expect($invalidPhoneNumberException->errorCode)->toBe('not_e164');
-    }
+    expect(fn (): PhoneNumber => new PhoneNumber('+6112345'))
+        ->toThrow(fn (InvalidPhoneNumberException $e): Expectation => expect($e->errorCode)->toBe('not_e164'));
 });
 
 test('rejects a number that is too long for AU/NZ', function (): void {
-    try {
-        new PhoneNumber('+61412345678901234');
-        $this->fail('expected InvalidPhoneNumberException');
-    } catch (InvalidPhoneNumberException $invalidPhoneNumberException) {
-        expect($invalidPhoneNumberException->errorCode)->toBe('not_e164');
-    }
+    expect(fn (): PhoneNumber => new PhoneNumber('+61412345678901234'))
+        ->toThrow(fn (InvalidPhoneNumberException $e): Expectation => expect($e->errorCode)->toBe('not_e164'));
 });
 
 test('rejects a number containing non-digit characters', function (): void {
-    try {
-        new PhoneNumber('+61 412-345-678');
-        $this->fail('expected InvalidPhoneNumberException');
-    } catch (InvalidPhoneNumberException $invalidPhoneNumberException) {
-        expect($invalidPhoneNumberException->errorCode)->toBe('malformed');
-    }
+    expect(fn (): PhoneNumber => new PhoneNumber('+61 412-345-678'))
+        ->toThrow(fn (InvalidPhoneNumberException $e): Expectation => expect($e->errorCode)->toBe('malformed'));
 });
 
 test('exposes the region for AU and NZ values', function (): void {

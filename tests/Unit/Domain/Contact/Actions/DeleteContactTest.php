@@ -6,6 +6,7 @@ use App\Models\Contact;
 use App\Models\ContactEmail;
 use App\Models\ContactPhone;
 use Domain\Contact\Actions\DeleteContact;
+use Domain\Contact\Exceptions\ContactNotFoundException;
 
 test('deletes the contact and cascades to phones and emails', function (): void {
     $contact = Contact::factory()
@@ -20,8 +21,7 @@ test('deletes the contact and cascades to phones and emails', function (): void 
         ->and(ContactEmail::query()->where('contact_id', $contact->id)->count())->toBe(0);
 });
 
-test('is idempotent when the contact does not exist', function (): void {
-    resolve(DeleteContact::class)->execute(999_999);
-
-    expect(Contact::query()->count())->toBe(0);
+test('throws ContactNotFoundException when the contact does not exist', function (): void {
+    expect(fn () => resolve(DeleteContact::class)->execute(999_999))
+        ->toThrow(ContactNotFoundException::class);
 });

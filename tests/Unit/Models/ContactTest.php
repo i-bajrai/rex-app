@@ -17,8 +17,8 @@ test('phones relationship returns the contact phones', function (): void {
     $phones = $contact->phones()->get();
 
     expect($phones)->toHaveCount(2)
-        ->and($phones->each(fn (ContactPhone $phone): PhoneNumber => $phone->e164))
-        ->each->toBeInstanceOf(ContactPhone::class);
+        ->each->toBeInstanceOf(ContactPhone::class)
+        ->and($phones->first()?->e164)->toBeInstanceOf(PhoneNumber::class);
 });
 
 test('emails relationship returns the contact emails', function (): void {
@@ -30,8 +30,8 @@ test('emails relationship returns the contact emails', function (): void {
     $emails = $contact->emails()->get();
 
     expect($emails)->toHaveCount(2)
-        ->and($emails->each(fn (ContactEmail $email): EmailAddress => $email->address))
-        ->each->toBeInstanceOf(ContactEmail::class);
+        ->each->toBeInstanceOf(ContactEmail::class)
+        ->and($emails->first()?->address)->toBeInstanceOf(EmailAddress::class);
 });
 
 test('primaryPhone returns the oldest phone by created_at', function (): void {

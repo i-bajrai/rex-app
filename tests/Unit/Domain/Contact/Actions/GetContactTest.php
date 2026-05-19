@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Contact;
 use Domain\Contact\Actions\GetContact;
 use Domain\Contact\Exceptions\ContactNotFoundException;
+use Pest\Expectation;
 
 test('returns the contact with eager-loaded phones and emails', function (): void {
     $contact = Contact::factory()
@@ -22,11 +23,7 @@ test('returns the contact with eager-loaded phones and emails', function (): voi
 });
 
 test('throws ContactNotFoundException when the contact id is missing', function (): void {
-    try {
-        resolve(GetContact::class)->execute(987_654);
-        $this->fail('expected ContactNotFoundException');
-    } catch (ContactNotFoundException $contactNotFoundException) {
-        expect($contactNotFoundException->errorCode)->toBe('contact.not_found')
-            ->and($contactNotFoundException->id)->toBe(987_654);
-    }
+    expect(fn () => resolve(GetContact::class)->execute(987_654))
+        ->toThrow(fn (ContactNotFoundException $e): Expectation => expect($e->errorCode)->toBe('contact.not_found')
+            ->and($e->id)->toBe(987_654));
 });

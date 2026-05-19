@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands\Contact;
 
 use Domain\Contact\Actions\DeleteContact;
+use Domain\Contact\Exceptions\ContactNotFoundException;
 use Illuminate\Console\Command;
 
 final class DeleteContactCommand extends Command
@@ -19,7 +20,13 @@ final class DeleteContactCommand extends Command
     {
         $id = (int) $this->argument('id');
 
-        $action->execute($id);
+        try {
+            $action->execute($id);
+        } catch (ContactNotFoundException $contactNotFoundException) {
+            $this->error($contactNotFoundException->getMessage());
+
+            return self::FAILURE;
+        }
 
         $this->line(sprintf('Contact %d deleted.', $id));
 

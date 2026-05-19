@@ -33,7 +33,7 @@ final class ContactController
         return new ContactResource($contact)
             ->response()
             ->setStatusCode(201)
-            ->header('Location', sprintf('/api/v1/contacts/%d', $contact->id));
+            ->header('Location', route('api.v1.contacts.show', $contact, absolute: false));
     }
 
     public function update(int $contact, UpsertContactRequest $request, UpsertContact $action): ContactResource
@@ -41,9 +41,8 @@ final class ContactController
         return new ContactResource($action->execute($request->toContactData(), $contact));
     }
 
-    public function destroy(int $contact, DeleteContact $action, GetContact $getContact): Response
+    public function destroy(int $contact, DeleteContact $action): Response
     {
-        $getContact->execute($contact);
         $action->execute($contact);
 
         return response()->noContent();

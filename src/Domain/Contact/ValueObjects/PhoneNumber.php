@@ -41,6 +41,11 @@ final readonly class PhoneNumber implements Stringable
         return $this->region;
     }
 
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
+    }
+
     private function guardMalformed(string $value): void
     {
         if (preg_match(self::PATTERN_E164, $value) !== 1) {

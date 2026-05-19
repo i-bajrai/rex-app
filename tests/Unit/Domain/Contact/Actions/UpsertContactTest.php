@@ -12,6 +12,7 @@ use Domain\Contact\ValueObjects\EmailAddress;
 use Domain\Contact\ValueObjects\PhoneNumber;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Pest\Expectation;
 
 test('creates a new contact with phones and emails when no id is supplied', function (): void {
     $data = new ContactData(
@@ -65,13 +66,9 @@ test('rejects an upsert whose phone is already attached to another contact', fun
         emails: [],
     );
 
-    try {
-        resolve(UpsertContact::class)->execute($data);
-        $this->fail('expected DuplicateContactPhoneException');
-    } catch (DuplicateContactPhoneException $duplicateContactPhoneException) {
-        expect($duplicateContactPhoneException->errorCode)->toBe('contact.phone.duplicate')
-            ->and($duplicateContactPhoneException->value)->toBe('+61412345678');
-    }
+    expect(fn () => resolve(UpsertContact::class)->execute($data))
+        ->toThrow(fn (DuplicateContactPhoneException $e): Expectation => expect($e->errorCode)->toBe('contact.phone.duplicate')
+            ->and($e->value)->toBe('+61412345678'));
 });
 
 test('rejects an upsert whose email is already attached to another contact', function (): void {
@@ -83,13 +80,9 @@ test('rejects an upsert whose email is already attached to another contact', fun
         emails: [new EmailAddress('Shared@Example.com')],
     );
 
-    try {
-        resolve(UpsertContact::class)->execute($data);
-        $this->fail('expected DuplicateContactEmailException');
-    } catch (DuplicateContactEmailException $duplicateContactEmailException) {
-        expect($duplicateContactEmailException->errorCode)->toBe('contact.email.duplicate')
-            ->and($duplicateContactEmailException->value)->toBe('shared@example.com');
-    }
+    expect(fn () => resolve(UpsertContact::class)->execute($data))
+        ->toThrow(fn (DuplicateContactEmailException $e): Expectation => expect($e->errorCode)->toBe('contact.email.duplicate')
+            ->and($e->value)->toBe('shared@example.com'));
 });
 
 test('allows keeping the contact own phones and emails on update', function (): void {

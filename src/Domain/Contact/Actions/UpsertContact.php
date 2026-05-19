@@ -29,10 +29,10 @@ final class UpsertContact
 
             $contact->fill($data->toModelAttributes())->save();
 
-            $this->replacePhones($contact, $data->phones);
-            $this->replaceEmails($contact, $data->emails);
+            $this->syncPhones($contact, $data->phones);
+            $this->syncEmails($contact, $data->emails);
 
-            return $contact->fresh(['phones', 'emails']) ?? $contact;
+            return $contact->load(['phones', 'emails']);
         });
     }
 
@@ -80,24 +80,44 @@ final class UpsertContact
     /**
      * @param  list<PhoneNumber>  $phones
      */
-    private function replacePhones(Contact $contact, array $phones): void
+    private function syncPhones(Contact $contact, array $phones): void
     {
-        $contact->phones()->delete();
+        $incoming = Collection::make($phones)->map(static fn (PhoneNumber $phone): string => (string) $phone);
+        $existing = $contact->phones()->get();
+        $existingValues = $existing->map(static fn (ContactPhone $phone): string => (string) $phone->e164);
 
-        Collection::make($phones)->each(function (PhoneNumber $phone) use ($contact): void {
-            $contact->phones()->create(['e164' => (string) $phone]);
-        });
+        $idsToDelete = $existing
+            ->reject(static fn (ContactPhone $phone): bool => $incoming->contains((string) $phone->e164))
+            ->pluck('id');
+
+        if ($idsToDelete->isNotEmpty()) {
+            $contact->phones()->whereKey($idsToDelete)->delete();
+        }
+
+        $incoming
+            ->reject(static fn (string $value): bool => $existingValues->contains($value))
+            ->each(static fn (string $value) => $contact->phones()->create(['e164' => $value]));
     }
 
     /**
      * @param  list<EmailAddress>  $emails
      */
-    private function replaceEmails(Contact $contact, array $emails): void
+    private function syncEmails(Contact $contact, array $emails): void
     {
-        $contact->emails()->delete();
+        $incoming = Collection::make($emails)->map(static fn (EmailAddress $email): string => (string) $email);
+        $existing = $contact->emails()->get();
+        $existingValues = $existing->map(static fn (ContactEmail $email): string => (string) $email->address);
 
-        Collection::make($emails)->each(function (EmailAddress $email) use ($contact): void {
-            $contact->emails()->create(['address' => (string) $email]);
-        });
+        $idsToDelete = $existing
+            ->reject(static fn (ContactEmail $email): bool => $incoming->contains((string) $email->address))
+            ->pluck('id');
+
+        if ($idsToDelete->isNotEmpty()) {
+            $contact->emails()->whereKey($idsToDelete)->delete();
+        }
+
+        $incoming
+            ->reject(static fn (string $value): bool => $existingValues->contains($value))
+            ->each(static fn (string $value) => $contact->emails()->create(['address' => $value]));
     }
 }

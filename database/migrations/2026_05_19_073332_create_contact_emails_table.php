@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('contact_emails', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('contact_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('contact_id')->index()->constrained()->cascadeOnDelete();
             $table->string('address')->unique();
             $table->string('address_domain')
                 ->storedAs("substr(address, instr(address, '@') + 1)")

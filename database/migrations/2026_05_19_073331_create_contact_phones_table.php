@@ -12,8 +12,8 @@ return new class extends Migration
     {
         Schema::create('contact_phones', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('contact_id')->constrained()->cascadeOnDelete();
-            $table->string('e164')->unique();
+            $table->foreignId('contact_id')->index()->constrained()->cascadeOnDelete();
+            $table->string('e164', 20)->unique();
             $table->timestamps();
         });
     }
