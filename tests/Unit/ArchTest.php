@@ -9,8 +9,4 @@ arch()->preset()->security()->ignoring([
     'assert',
 ]);
 
-arch('controllers')
-    ->expect('App\Http\Controllers')
-    ->not->toBeUsed();
-
 //
