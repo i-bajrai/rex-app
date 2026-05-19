@@ -19,7 +19,7 @@ final class SearchContactsCommand extends Command
     protected $signature = 'contact:search
         {--name= : Name prefix (case-insensitive)}
         {--phone= : Exact E164 phone number}
-        {--email-domain= : Email domain (case-insensitive)}';
+        {--email= : Exact email address (case-insensitive)}';
 
     /** @var string */
     protected $description = 'Search contacts via the shared SearchContacts action.';
@@ -31,7 +31,7 @@ final class SearchContactsCommand extends Command
         $criteria = new ContactSearchCriteria(
             name: $this->stringOrNull('name'),
             phone: is_string($phoneValue) && $phoneValue !== '' ? new PhoneNumber($phoneValue) : null,
-            emailDomain: $this->stringOrNull('email-domain'),
+            email: $this->stringOrNull('email'),
         );
 
         $results = $searchContacts->execute($criteria)

@@ -28,11 +28,20 @@ test('matches contacts whose phone equals the supplied E164 value exactly', func
     expect($results->pluck('id')->all())->toBe([$match->id]);
 });
 
-test('matches contacts whose email domain equals the supplied value case-insensitively', function (): void {
+test('matches contacts whose email equals the supplied address exactly, ignoring case', function (): void {
     $match = Contact::factory()->withEmail('jane@example.com')->create();
-    Contact::factory()->withEmail('bob@other.com')->create();
+    Contact::factory()->withEmail('someone-else@example.com')->create();
 
-    $results = resolve(SearchContacts::class)->execute(new ContactSearchCriteria(emailDomain: 'Example.COM'));
+    $results = resolve(SearchContacts::class)->execute(new ContactSearchCriteria(email: 'JANE@Example.COM'));
+
+    expect($results->pluck('id')->all())->toBe([$match->id]);
+});
+
+test('does not match contacts that share the same domain when searching by exact email', function (): void {
+    $match = Contact::factory()->withEmail('jane@example.com')->create();
+    Contact::factory()->withEmail('someone-else@example.com')->create();
+
+    $results = resolve(SearchContacts::class)->execute(new ContactSearchCriteria(email: 'jane@example.com'));
 
     expect($results->pluck('id')->all())->toBe([$match->id]);
 });
@@ -43,16 +52,16 @@ test('combines multiple criteria with AND semantics', function (): void {
         ->create(['name' => 'Jane Smith']);
 
     Contact::factory()
-        ->withEmail('jan@other.com')
+        ->withEmail('jan@example.com')
         ->create(['name' => 'Janelle Other']);
 
     Contact::factory()
-        ->withEmail('bob@example.com')
+        ->withEmail('jane@example.com.au')
         ->create(['name' => 'Bob Baker']);
 
     $results = resolve(SearchContacts::class)->execute(new ContactSearchCriteria(
         name: 'jan',
-        emailDomain: 'example.com',
+        email: 'jane@example.com',
     ));
 
     expect($results->pluck('id')->all())->toBe([$match->id]);

@@ -11,19 +11,13 @@ import {
 type SearchForm = {
     name: string;
     phone: string;
-    email_domain: string;
+    email: string;
 };
 
-const EMPTY_SEARCH: SearchForm = { name: '', phone: '', email_domain: '' };
+const EMPTY_SEARCH: SearchForm = { name: '', phone: '', email: '' };
 
 function hasAnyCriterion(form: SearchForm): boolean {
-    return form.name !== '' || form.phone !== '' || form.email_domain !== '';
-}
-
-function normaliseEmailDomain(value: string): string {
-    const atIndex = value.lastIndexOf('@');
-    const domain = atIndex === -1 ? value : value.slice(atIndex + 1);
-    return domain.toLowerCase();
+    return form.name !== '' || form.phone !== '' || form.email !== '';
 }
 
 export function ContactsIndex(): JSX.Element {
@@ -48,8 +42,8 @@ export function ContactsIndex(): JSX.Element {
             if (active.phone !== '') {
                 query.phone = active.phone;
             }
-            if (active.email_domain !== '') {
-                query.email_domain = normaliseEmailDomain(active.email_domain);
+            if (active.email !== '') {
+                query.email = active.email;
             }
             return searchContacts(query);
         },
@@ -92,13 +86,13 @@ export function ContactsIndex(): JSX.Element {
                 />
                 <input
                     type="text"
-                    name="email_domain"
-                    placeholder="Email or domain"
-                    value={form.email_domain}
+                    name="email"
+                    placeholder="Email"
+                    value={form.email}
                     onChange={(event) =>
                         setForm({
                             ...form,
-                            email_domain: event.target.value,
+                            email: event.target.value,
                         })
                     }
                     className="rounded border border-gray-300 px-3 py-2 text-sm"

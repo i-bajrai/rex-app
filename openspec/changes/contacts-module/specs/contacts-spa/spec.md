@@ -55,19 +55,15 @@ The system SHALL display a distinct UI state for every possible outcome returned
 - **THEN** the SPA SHALL show "Try again in Ns" and re-enable the call button after that many seconds
 
 ### Requirement: SPA list and search interactions
-The system SHALL render the list and search endpoints as a single screen with a search affordance, so an operator can find a contact by name, full phone, or email domain without leaving the list view.
+The system SHALL render the list and search endpoints as a single screen with a search affordance, so an operator can find a contact by name, full phone, or exact email without leaving the list view.
 
 #### Scenario: Default list view
 - **WHEN** the user opens `/contacts` with no search input
 - **THEN** the SPA SHALL render the list endpoint's results (newest first, capped at the server's configured limit) with each row showing name plus phone/email counts
 
 #### Scenario: Search input dispatches to the search endpoint
-- **WHEN** the user enters a value in the name, phone, or email-domain search input
-- **THEN** the SPA SHALL call `/api/v1/contacts/search` with the corresponding query parameter; multiple inputs MUST be combined as AND on the same request
-
-#### Scenario: Email-domain search accepts a full address and dispatches its domain
-- **WHEN** the user enters a value containing `@` in the email search input (e.g. `jane@example.com`)
-- **THEN** the SPA SHALL extract the substring after the final `@`, lowercased, and submit that as the `email_domain` query parameter; a bare domain (no `@`) MUST be submitted as-is
+- **WHEN** the user enters a value in the name, phone, or email search input
+- **THEN** the SPA SHALL call `/api/v1/contacts/search` with the corresponding query parameter (`name`, `phone`, or `email`); multiple inputs MUST be combined as AND on the same request
 
 #### Scenario: Empty search results render an empty state, not an error
 - **WHEN** the search endpoint returns `200` with `{data: []}`

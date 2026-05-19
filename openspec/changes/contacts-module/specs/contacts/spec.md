@@ -112,8 +112,8 @@ The system SHALL return contacts in reverse-chronological creation order (newest
 - **WHEN** there are no contacts and the client `GET`s `/api/v1/contacts`
 - **THEN** the system SHALL return `200` with `data: []`, not `404`
 
-### Requirement: Search contacts (name, phone, email-domain)
-The system SHALL allow searching contacts on three orthogonal axes: name (case-insensitive prefix match), full phone number (exact match in E164), and email domain (case-insensitive exact match on the part after `@`). At least one criterion MUST be supplied; multiple criteria are combined with AND.
+### Requirement: Search contacts (name, phone, email)
+The system SHALL allow searching contacts on three orthogonal axes: name (case-insensitive prefix match), full phone number (exact match in E164), and email address (exact match against the normalised address, case-insensitive). At least one criterion MUST be supplied; multiple criteria are combined with AND.
 
 #### Scenario: Search by name prefix
 - **WHEN** the client `GET`s `/api/v1/contacts/search?name=jan`
@@ -123,12 +123,12 @@ The system SHALL allow searching contacts on three orthogonal axes: name (case-i
 - **WHEN** the client `GET`s `/api/v1/contacts/search?phone=%2B61412345678`
 - **THEN** the system SHALL return the contact that owns that phone, or an empty list if none does
 
-#### Scenario: Search by email domain
-- **WHEN** the client `GET`s `/api/v1/contacts/search?email_domain=Example.com`
-- **THEN** the system SHALL return every contact with at least one email whose domain (post-`@` part) equals `example.com` (case-insensitive)
+#### Scenario: Search by exact email
+- **WHEN** the client `GET`s `/api/v1/contacts/search?email=JANE@Example.com`
+- **THEN** the system SHALL return every contact whose normalised email address equals `jane@example.com` (case-insensitive); a contact sharing only the domain MUST NOT match
 
 #### Scenario: Combined criteria are AND-ed
-- **WHEN** the client `GET`s `/api/v1/contacts/search?name=jan&email_domain=example.com`
+- **WHEN** the client `GET`s `/api/v1/contacts/search?name=jan&email=jane@example.com`
 - **THEN** the system SHALL return only contacts that match BOTH criteria
 
 #### Scenario: Empty search is rejected
@@ -140,7 +140,7 @@ The system SHALL allow searching contacts on three orthogonal axes: name (case-i
 - **THEN** the system SHALL reject with `422` `code=contact.phone.not_e164` or `code=contact.phone.unsupported_region` as appropriate
 
 #### Scenario: Search via CLI dispatches the same action
-- **WHEN** an operator runs `php artisan contact:search --email-domain=example.com`
+- **WHEN** an operator runs `php artisan contact:search --email=jane@example.com`
 - **THEN** the system SHALL invoke the same `SearchContacts` action as the HTTP path and print the matching contacts as JSON
 
 ### Requirement: Delete contact

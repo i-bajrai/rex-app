@@ -30,9 +30,9 @@ final class SearchContacts
                 'id',
                 ContactPhone::query()->where('e164', (string) $criteria->phone)->select('contact_id'),
             ))
-            ->when($criteria->emailDomain, fn (Builder $query, string $domain): Builder => $query->whereIn(
+            ->when($criteria->email, fn (Builder $query, string $email): Builder => $query->whereIn(
                 'id',
-                ContactEmail::query()->where('address_domain', mb_strtolower($domain))->select('contact_id'),
+                ContactEmail::query()->where('address', mb_strtolower($email))->select('contact_id'),
             ))->latest()
             ->orderByDesc('id')
             ->limit($limit)

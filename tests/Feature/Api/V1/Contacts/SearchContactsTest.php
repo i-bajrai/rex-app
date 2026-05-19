@@ -26,29 +26,40 @@ test('GET /api/v1/contacts/search?phone= matches a contact by exact E164 phone',
         ->assertJsonPath('data.0.id', $match->id);
 });
 
-test('GET /api/v1/contacts/search?email_domain= matches contacts by case-insensitive email domain', function (): void {
+test('GET /api/v1/contacts/search?email= matches a contact by exact email address', function (): void {
     $match = Contact::factory()->withEmail('jane@example.com')->create();
-    Contact::factory()->withEmail('bob@other.com')->create();
+    Contact::factory()->withEmail('someone-else@example.com')->create();
 
-    $response = $this->getJson('/api/v1/contacts/search?email_domain=Example.com');
+    $response = $this->getJson('/api/v1/contacts/search?email=jane@example.com');
 
     $response->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('data.0.id', $match->id);
 });
 
-test('GET /api/v1/contacts/search combines name and email_domain with AND', function (): void {
+test('GET /api/v1/contacts/search?email= matches case-insensitively against the normalised address', function (): void {
+    $match = Contact::factory()->withEmail('jane@example.com')->create();
+    Contact::factory()->withEmail('someone-else@example.com')->create();
+
+    $response = $this->getJson('/api/v1/contacts/search?email=JANE@EXAMPLE.COM');
+
+    $response->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $match->id);
+});
+
+test('GET /api/v1/contacts/search combines name and email with AND', function (): void {
     $match = Contact::factory()
         ->withEmail('jane@example.com')
         ->create(['name' => 'Jane Smith']);
     Contact::factory()
-        ->withEmail('jan@other.com')
+        ->withEmail('jan@example.com')
         ->create(['name' => 'Janelle']);
     Contact::factory()
-        ->withEmail('bob@example.com')
+        ->withEmail('jane@example.com.au')
         ->create(['name' => 'Bob']);
 
-    $response = $this->getJson('/api/v1/contacts/search?name=jan&email_domain=example.com');
+    $response = $this->getJson('/api/v1/contacts/search?name=jan&email=jane@example.com');
 
     $response->assertOk()
         ->assertJsonCount(1, 'data')

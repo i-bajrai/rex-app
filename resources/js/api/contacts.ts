@@ -48,7 +48,7 @@ export type ContactPayload = {
 export type ContactSearchQuery = {
     name?: string;
     phone?: string;
-    email_domain?: string;
+    email?: string;
 };
 
 export type FieldDetail = { field: string; code: string; message: string };
@@ -144,8 +144,8 @@ export function searchContacts(
     if (query.phone !== undefined && query.phone !== '') {
         params.set('phone', query.phone);
     }
-    if (query.email_domain !== undefined && query.email_domain !== '') {
-        params.set('email_domain', query.email_domain);
+    if (query.email !== undefined && query.email !== '') {
+        params.set('email', query.email);
     }
 
     return request<{ data: ContactListRow[] }>(

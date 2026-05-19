@@ -11,11 +11,11 @@ final readonly class ContactSearchCriteria
     public function __construct(
         public ?string $name = null,
         public ?PhoneNumber $phone = null,
-        public ?string $emailDomain = null,
+        public ?string $email = null,
     ) {}
 
     public function isEmpty(): bool
     {
-        return $this->name === null && ! $this->phone instanceof PhoneNumber && $this->emailDomain === null;
+        return $this->name === null && ! $this->phone instanceof PhoneNumber && $this->email === null;
     }
 }

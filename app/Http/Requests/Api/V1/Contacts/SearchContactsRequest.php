@@ -18,7 +18,7 @@ final class SearchContactsRequest extends FormRequest
         return [
             'name' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string'],
-            'email_domain' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'string', 'email:rfc', 'max:254'],
         ];
     }
 
@@ -29,7 +29,7 @@ final class SearchContactsRequest extends FormRequest
         return new ContactSearchCriteria(
             name: $this->stringOrNull('name'),
             phone: is_string($phoneValue) && $phoneValue !== '' ? new PhoneNumber($phoneValue) : null,
-            emailDomain: $this->stringOrNull('email_domain'),
+            email: $this->stringOrNull('email'),
         );
     }
 

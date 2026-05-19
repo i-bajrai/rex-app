@@ -125,6 +125,19 @@
 
 - [x] 16.1 `resources/js/pages/contacts/Index.tsx` — extract the substring after the last `@` (lowercased) before dispatching `email_domain`; a bare domain submits as-is
 - [x] 16.2 Update the email search placeholder to "Email or domain" to surface the forgiving behaviour
-- [x] 16.3 Browser test: typing a full address (e.g. `i.bajrai@gmail.com`) matches a contact whose email lives on that domain
+- [x] 16.3 Browser test: typing a full address (e.g. `jane@example.com`) matches a contact whose email lives on that domain
 - [x] 16.4 `composer test` green
 - [x] 16.5 `bun run build` green
+
+## 17. Exact-email search replaces email-domain search
+
+- [x] 17.1 `ContactSearchCriteria` — rename `?string $emailDomain` to `?string $email`; update `isEmpty()` accordingly
+- [x] 17.2 `SearchContacts` action — replace `address_domain` lookup on `contact_emails` with exact `address` match (lowercased criterion); `address_domain` generated column stays in place as harmless dead weight
+- [x] 17.3 `SearchContactsRequest` — rename query param `email_domain` to `email`; rules mirror an email (`email:rfc`, `max:254`); `toCriteria()` builds the new DTO
+- [x] 17.4 `contact:search` CLI — rename `--email-domain=` option to `--email=`; help text updated
+- [x] 17.5 `resources/js/api/contacts.ts` — `ContactSearchQuery.email_domain` becomes `email`; URL builder sends `email`
+- [x] 17.6 `resources/js/pages/contacts/Index.tsx` — drop `normaliseEmailDomain`; rename `SearchForm.email_domain` to `email`; input `name`/placeholder updated; value sent raw (backend lowercases)
+- [x] 17.7 Specs — `contacts/spec.md` "Search by email domain" scenario becomes "Search by exact email"; `contacts-spa/spec.md` drops the obsolete "Email-domain search accepts a full address" scenario and rephrases the search-input dispatch scenario
+- [x] 17.8 Tests rewritten — unit, feature, console, browser all exercise exact-email behaviour; new cases cover same-domain non-match and mixed-case match
+- [x] 17.9 Personal email addresses scrubbed from tests, fixtures, and OpenSpec artifacts; replaced with generic `jane@example.com` / `alex@example.com` style addresses
+- [x] 17.10 `composer test` green; `bun run build` green

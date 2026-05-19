@@ -11,7 +11,7 @@ test('contact:search prints matching contacts as JSON', function (): void {
         ->withEmail('jane@example.com')
         ->create(['name' => 'Jane']);
 
-    $exit = Artisan::call('contact:search', ['--email-domain' => 'example.com']);
+    $exit = Artisan::call('contact:search', ['--email' => 'jane@example.com']);
     $output = Artisan::output();
 
     expect($exit)->toBe(0)
