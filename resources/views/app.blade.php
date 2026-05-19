@@ -7,6 +7,7 @@
 
     <title>{{ config('app.name', 'Rex Contacts') }}</title>
 
+    @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.tsx'])
 </head>
 <body class="bg-white text-gray-900 antialiased min-h-screen">
