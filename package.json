@@ -8,12 +8,12 @@
         "test:lint": "NODE_OPTIONS='--experimental-strip-types' vp fmt --check resources/"
     },
     "devDependencies": {
-        "@tailwindcss/vite": "^4.2.2",
+        "@tailwindcss/vite": "^4.3.0",
         "concurrently": "^9.2.1",
-        "laravel-vite-plugin": "^3.0.1",
-        "npm-check-updates": "^21.0.2",
-        "playwright": "^1.59.1",
-        "tailwindcss": "^4.2.2",
+        "laravel-vite-plugin": "^3.1.0",
+        "npm-check-updates": "^22.2.0",
+        "playwright": "^1.60.0",
+        "tailwindcss": "^4.3.0",
         "vite": "npm:@voidzero-dev/vite-plus-core@latest",
         "vite-plus": "latest"
     },
