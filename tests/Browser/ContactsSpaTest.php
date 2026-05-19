@@ -25,6 +25,18 @@ it('renders contacts on the list when some exist', function (): void {
         ->assertSee('Alex Wong');
 });
 
+it('matches by email domain when the user types a full email', function (): void {
+    Contact::factory()->withEmail('i.bajrai@gmail.com')->create(['name' => 'Jane']);
+    Contact::factory()->withEmail('alex@example.com')->create(['name' => 'Alex']);
+
+    $page = visit('/contacts');
+
+    $page->type('input[name=email_domain]', 'i.bajrai@gmail.com')
+        ->click('Search')
+        ->assertSee('Jane')
+        ->assertDontSee('Alex');
+});
+
 it('shows a scoped empty state when search yields no matches', function (): void {
     Contact::factory()->withEmail('alex@example.com')->create(['name' => 'Alex']);
 

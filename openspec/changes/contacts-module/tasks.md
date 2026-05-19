@@ -120,3 +120,11 @@
 - [x] 15.3 `tests/Feature/RootRedirectTest.php` — assert `GET /` returns `302` with `Location: /contacts`
 - [x] 15.4 Browser test: `visit('/')` lands at `/contacts` with the contacts page rendered
 - [x] 15.5 `composer test` green
+
+## 16. Email-domain search accepts a full address
+
+- [x] 16.1 `resources/js/pages/contacts/Index.tsx` — extract the substring after the last `@` (lowercased) before dispatching `email_domain`; a bare domain submits as-is
+- [x] 16.2 Update the email search placeholder to "Email or domain" to surface the forgiving behaviour
+- [x] 16.3 Browser test: typing a full address (e.g. `i.bajrai@gmail.com`) matches a contact whose email lives on that domain
+- [x] 16.4 `composer test` green
+- [x] 16.5 `bun run build` green

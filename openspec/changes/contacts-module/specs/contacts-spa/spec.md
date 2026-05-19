@@ -65,6 +65,10 @@ The system SHALL render the list and search endpoints as a single screen with a 
 - **WHEN** the user enters a value in the name, phone, or email-domain search input
 - **THEN** the SPA SHALL call `/api/v1/contacts/search` with the corresponding query parameter; multiple inputs MUST be combined as AND on the same request
 
+#### Scenario: Email-domain search accepts a full address and dispatches its domain
+- **WHEN** the user enters a value containing `@` in the email search input (e.g. `jane@example.com`)
+- **THEN** the SPA SHALL extract the substring after the final `@`, lowercased, and submit that as the `email_domain` query parameter; a bare domain (no `@`) MUST be submitted as-is
+
 #### Scenario: Empty search results render an empty state, not an error
 - **WHEN** the search endpoint returns `200` with `{data: []}`
 - **THEN** the SPA SHALL display an empty-state message scoped to the active search criteria, not a generic error
