@@ -4,7 +4,7 @@ A Laravel 13 + PHP 8.5 contacts module: HTTP API, Artisan CLI, queued-job seam, 
 
 ## Architecture
 
-This module is the first vertical slice of a DDD-lite layout. All custom business logic lives under `src/Domain/` (PSR-4 mapped via `composer.json`); Eloquent models stay under `app/Models/` for Laravel's discovery and factory conventions.
+DDD-lite layout: business logic under `src/Domain/` (PSR-4 mapped in `composer.json`); Eloquent models stay under `app/Models/` for Laravel's discovery and factory conventions.
 
 ```
 src/Domain/Contact/
@@ -31,34 +31,41 @@ src/Domain/Contact/
     └── EmailAddress.php         RFC syntax + 254-char cap + lowercase normalisation
 ```
 
-**Per-aggregate rule.** One bounded context per aggregate. `Contact` is the only aggregate in this exercise; the directory layout is intentionally repeatable for future aggregates (`Domain\Company\`, `Domain\Deal\`, etc.) without reshaping the rest of the codebase.
+**Per-aggregate rule.** One bounded context per aggregate. `Contact` is the only one here; future aggregates (`Domain\Company\`, `Domain\Deal\`) drop into the same layout.
 
-**Single-action seam.** HTTP controllers (`App\Http\Controllers\Api\V1\*`), Artisan commands (`App\Console\Commands\Contact\*`), and the `App\Jobs\UpsertContactJob` queued-job seam all build the same DTO and dispatch the same `Domain\Contact\Actions\*` class. None of them contain Eloquent query chains or validation rules — architecture tests in `tests/Unit/Arch/ContactDomainTest.php` pin this, including a check that `App\Jobs\*` doesn't reach for `App\Models\Contact*`.
+**Single-action seam.** Chosen so a contact created via HTTP, CLI, or queued job goes through identical validation, transactional boundaries, and error shapes — no entry point can quietly diverge. Controllers (`App\Http\Controllers\Api\V1\*`), Artisan commands (`App\Console\Commands\Contact\*`), and `App\Jobs\UpsertContactJob` all build the same DTO and dispatch the same `Domain\Contact\Actions\*` class; none contain Eloquent or validation rules. Architecture tests in `tests/Unit/Arch/ContactDomainTest.php` pin this, including a check that `App\Jobs\*` can't reach `App\Models\Contact*`.
 
-**Test-first cadence.** Every behavioural change in this module landed test-first: write the failing test (full bodies, not stubs), run to confirm red, then implement until green. The cadence is recorded in `openspec/changes/contacts-module/tasks.md`. Non-behavioural work (autoload, formatting, file moves, schema migrations, factories) skipped the cadence by design.
+**Test-first cadence.** Behavioural changes landed test-first — failing test (full body, not a stub), confirm red, implement to green. Cadence recorded in `openspec/changes/contacts-module/tasks.md`. Non-behavioural work (autoload, formatting, migrations, factories) skipped it by design.
 
-**Error envelope.** Every 4xx/5xx response from `/api/v1/contacts*` flows through `App\Http\ApiErrorEnvelope` (wired in `bootstrap/app.php`), so consumers get a stable shape: `{error: {code, message, details}}` for domain rejections, `{error: {code: "validation_failed", details: [{field, code, message}]}}` for form-request validation, plus `Retry-After` on `429`. Success responses are never wrapped.
+**Error envelope.** All 4xx/5xx responses from `/api/v1/contacts*` flow through `App\Http\ApiErrorEnvelope` (wired in `bootstrap/app.php`): `{error: {code, message, details}}` for domain rejections, `{error: {code: "validation_failed", details: [{field, code, message}]}}` for form validation, plus `Retry-After` on `429`. Success responses are not wrapped.
 
-**SPA.** `resources/js/app.tsx` mounts a React 19 SPA from the `/contacts*` Blade shell (`resources/views/app.blade.php`). State via TanStack Query; routing via react-router; forms via react-hook-form + zod (E164 AU/NZ, RFC email, 254-char cap mirroring the backend). The `mapServerErrorsToFields` helper in `resources/js/api/contacts.ts` routes the server's `details[].field` dot-paths into the matching react-hook-form errors so duplicate-phone / duplicate-email server rejections land inline against the offending input.
+**SPA.** React 19 mounted from the `/contacts*` Blade shell (`resources/views/app.blade.php`). TanStack Query, react-router, react-hook-form + zod (rules mirror the backend). `mapServerErrorsToFields` in `resources/js/api/contacts.ts` routes the server's `details[].field` dot-paths into matching react-hook-form errors, so duplicate-phone/email rejections land inline against the offending input.
 
 ## Concessions
 
-These are deliberate trade-offs sized for the exercise — each has a clear upgrade path documented at the point of use.
+Trade-offs sized for the exercise — each has an upgrade path at the seam.
 
-- **Hand-rolled E164 regex (`+(61|64)\d{8,10}`)** instead of `giggsey/libphonenumber-for-php`. Accepts shapes a true libphonenumber check would reject (e.g. AU area codes that don't exist). The seam is `PhoneNumber::__construct` — single-file swap when needed.
-- **`LIKE`-based name search** (and exact-match on the normalised email column). Adequate at exercise scale; degrades beyond ~100k rows. `SearchContacts` action is the only place that needs to change to swap in Scout/Meilisearch/pg trgm.
-- **No soft-delete, audit log, or call-log persistence.** `PlaceCallToContact` returns a `CallOutcome` DTO and discards it. The obvious next aggregate is `Domain\CallLog\` keyed on `(contact_id, called_at)`.
-- **Deterministic fake telephony.** `FakeTelephonyGateway` is seeded so tests get stable outcomes; the production binding is the seam point in `AppServiceProvider`. Real provider not in scope.
-- **Hard-cap list/search instead of pagination.** Server caps at 50 rows; matches the SPA's single-screen affordance. Trivial to swap for `paginate()` if needed.
-- **No optimistic locking on upsert.** Two simultaneous PUTs are last-write-wins. Out of scope for the exercise.
+- **Hand-rolled E164 regex (`+(61|64)\d{8,10}`)** instead of `giggsey/libphonenumber-for-php`. Accepts shapes a true libphonenumber check would reject (e.g. AU area codes that don't exist). Swap point: `PhoneNumber::__construct`.
+- **`LIKE`-based name search** (exact-match on the normalised email column). Adequate at exercise scale; degrades beyond ~100k rows. `SearchContacts` is the only place to change to swap in Scout/Meilisearch/pg trgm.
+- **Deterministic fake telephony.** `FakeTelephonyGateway` is seeded so tests get stable outcomes; production binding is the seam in `AppServiceProvider`.
+- **Hard-cap list/search instead of pagination.** Server caps at 50 rows to match the SPA's single-screen affordance. Trivial to swap for `paginate()`.
+- **No optimistic locking on upsert.** Two simultaneous PUTs are last-write-wins.
 
-## AI tooling
+## With more scope
 
-This module was built using **OpenSpec** (proposal → design → spec → tasks) for upfront thinking, and **Claude Code** for the implementation cadence (test-first, run-to-red, implement-until-green, per sub-section in `tasks.md`).
+- **Call-log aggregate.** `PlaceCallToContact` returns a `CallOutcome` and discards it. The next aggregate is `Domain\CallLog\` keyed on `(contact_id, called_at)`, repeating the Action/DTO/Exception shape.
+- **Soft-delete and audit log.** Cascade delete is hard today. `SoftDeletes` plus an audit channel writing to `contact_events` would slot in behind `DeleteContact` and `UpsertContact` without changing callers.
+- **Real telephony adapter.** Bind a Twilio/MessageMedia implementation of `TelephonyGateway` in `AppServiceProvider`; no other file changes.
+- **Friendly Artisan errors.** Domain exceptions (e.g. `DuplicateContactPhoneException`) surface in CLI commands as raw stack traces today. Catching them in `App\Console\Commands\Contact\*` and rendering via `$this->error(...)` would mirror the HTTP error envelope's UX.
 
-- **OpenSpec artifacts** live in `openspec/changes/contacts-module/`: `proposal.md` framed the why and what, `design.md` recorded the decisions (DDD-lite layout, VO-at-the-boundary validation, single-action seam, fake telephony gateway, error envelope shape), `specs/` captured the behavioural requirements (one capability for the backend, one for the SPA), and `tasks.md` broke implementation into 12 sequential sections with a strict test-first cadence per behavioural group.
-- **What AI did.** Drafted the OpenSpec artifacts to my prompts, generated each failing test from the spec scenarios verbatim, then implemented until green. Each section's commit landed only after `composer test` (type coverage, 100% line coverage, pint, rector, phpstan) was green; the SPA section additionally landed only after a real-browser smoke pass via the Pest browser plugin driving Playwright/Chromium.
-- **What I checked.** Reviewed diffs, verified the OpenSpec artifacts, and used the application as a tester — walking the SPA end-to-end, probing forms with edge-case input, watching how empty states, validation feedback, and error surfaces behaved, and looking for the kind of small UX rough edges automated tests don't catch.
+## AI tooling and oversight
+
+Built with **OpenSpec** (proposal → design → spec → tasks) for thinking and **Claude Code** for the implementation cadence (test-first, per sub-section in `tasks.md`).
+
+- **OpenSpec artifacts** live in `openspec/changes/contacts-module/`: `proposal.md` (why/what), `design.md` (decisions — DDD-lite, VO-at-boundary validation, single-action seam, fake telephony, error envelope), `specs/` (behavioural requirements, one capability per surface), `tasks.md` (12 sections, strict test-first per behavioural group).
+- **What AI did.** Drafted the OpenSpec artifacts to my prompts, generated each failing test from the spec scenarios verbatim, then implemented to green.
+- **Guardrails that kept the output honest.** Every commit had to pass `composer test` — type coverage 100%, line coverage 100%, phpstan max, pint, rector. Architecture tests in `tests/Unit/Arch/ContactDomainTest.php` pin the single-action seam (no Eloquent in controllers, jobs, or commands; `App\Jobs\*` can't reach `App\Models\Contact*`), so an AI-generated shortcut fails CI rather than landing silently. The SPA section additionally required a real-browser smoke pass via the Pest browser plugin driving Playwright/Chromium.
+- **What I checked manually.** Reviewed every diff, verified OpenSpec artifacts matched intent, and used the SPA end-to-end — probing forms with edge-case input and watching empty states, validation feedback, and error surfaces for the rough edges automated tests don't catch.
 
 ## Running locally
 
