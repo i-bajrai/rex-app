@@ -47,7 +47,7 @@ Trade-offs sized for the exercise — each has an upgrade path at the seam.
 
 - **Hand-rolled E164 regex (`+(61|64)\d{8,10}`)** instead of `giggsey/libphonenumber-for-php`. Accepts shapes a true libphonenumber check would reject (e.g. AU area codes that don't exist). Swap point: `PhoneNumber::__construct`.
 - **`LIKE`-based name search** (exact-match on the normalised email column). Adequate at exercise scale; degrades beyond ~100k rows. `SearchContacts` is the only place to change to swap in Scout/Meilisearch/pg trgm.
-- **Deterministic fake telephony.** `FakeTelephonyGateway` is seeded so tests get stable outcomes; production binding is the seam in `AppServiceProvider`.
+- **Stand-in telephony.** `FakeTelephonyGateway` is bound at the `TelephonyGateway` seam in `AppServiceProvider` with a per-resolution random seed so request outcomes vary; tests construct it directly with an explicit seed for determinism. Real provider not in scope.
 - **Hard-cap list/search instead of pagination.** Server caps at 50 rows to match the SPA's single-screen affordance. Trivial to swap for `paginate()`.
 - **No optimistic locking on upsert.** Two simultaneous PUTs are last-write-wins.
 

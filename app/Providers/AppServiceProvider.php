@@ -13,7 +13,10 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(TelephonyGateway::class, FakeTelephonyGateway::class);
+        $this->app->singleton(
+            TelephonyGateway::class,
+            fn (): FakeTelephonyGateway => new FakeTelephonyGateway(random_int(PHP_INT_MIN, PHP_INT_MAX)),
+        );
     }
 
     public function boot(): void
