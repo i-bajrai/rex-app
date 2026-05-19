@@ -20,9 +20,20 @@ final class UpsertContactRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'phones' => ['present', 'array'],
-            'phones.*' => ['string'],
+            'phones.*' => ['string', 'distinct'],
             'emails' => ['present', 'array'],
-            'emails.*' => ['string'],
+            'emails.*' => ['string', 'distinct:ignore_case'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'phones.*.distinct' => 'This phone number is duplicated in your submission.',
+            'emails.*.distinct' => 'This email address is duplicated in your submission.',
         ];
     }
 

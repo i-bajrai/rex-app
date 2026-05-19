@@ -15,6 +15,16 @@ The system SHALL represent a contact as a record with a name, zero or more phone
 - **WHEN** an email address (case-insensitive) already attached to contact A is included in an upsert for contact B
 - **THEN** the system SHALL reject the upsert with `422` `code=contact.email.duplicate` and the offending normalised address in the error payload
 
+#### Scenario: Duplicate phone number within the same upsert payload
+- **WHEN** the same E164 value appears more than once in the `phones` array of a single upsert request
+- **THEN** the system SHALL reject the request with `422` using the field-level validation envelope (`code=validation_failed`), with one `details` entry per duplicate occurrence keyed by its array index (e.g. `field=phones.1`, `code=duplicate`); the request MUST NOT reach the unique-constraint layer
+- **AND** the rule applies equally on create and update
+
+#### Scenario: Duplicate email address within the same upsert payload
+- **WHEN** the same email (case-insensitive after normalisation) appears more than once in the `emails` array of a single upsert request
+- **THEN** the system SHALL reject the request with `422` using the field-level validation envelope (`code=validation_failed`), with one `details` entry per duplicate occurrence keyed by its array index (e.g. `field=emails.1`, `code=duplicate`); the request MUST NOT reach the unique-constraint layer
+- **AND** the rule applies equally on create and update
+
 ### Requirement: Phone-number validation (E164, AU/NZ only)
 The system SHALL accept phone numbers only in E164 format and only when the country code is Australia (`+61`) or New Zealand (`+64`). Validation MUST occur at the value-object boundary, so the rule holds identically for HTTP, CLI, and any future entry point.
 

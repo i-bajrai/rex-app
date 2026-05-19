@@ -15,6 +15,8 @@ use Domain\Contact\Exceptions\NoSearchCriteriaException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -59,32 +61,46 @@ final class ApiErrorEnvelope
     {
         /** @var array<string, array<int, string>> $errors */
         $errors = $exception->errors();
+        /** @var array<string, array<string, array<int, mixed>>> $failedRules */
+        $failedRules = $exception->validator->failed();
 
         return self::respond(422, [
             'code' => 'validation_failed',
             'message' => 'The given data was invalid.',
-            'details' => self::buildValidationDetails($errors),
+            'details' => self::buildValidationDetails($errors, $failedRules),
         ]);
     }
 
     /**
      * @param  array<string, array<int, string>>  $errors
+     * @param  array<string, array<string, array<int, mixed>>>  $failedRules
      * @return list<array{field: string, code: string, message: string}>
      */
-    private static function buildValidationDetails(array $errors): array
+    private static function buildValidationDetails(array $errors, array $failedRules): array
     {
-        return array_merge([], ...array_map(
-            static fn (array $messages, string $field): array => array_map(
-                static fn (string $message): array => [
+        return array_values(Collection::make($errors)
+            ->flatMap(static fn (array $messages, string $field): array => Collection::make($messages)
+                ->values()
+                ->map(static fn (string $message, int $index): array => [
                     'field' => $field,
-                    'code' => 'invalid',
+                    'code' => self::normaliseRuleCode(
+                        Collection::make($failedRules[$field] ?? [])->keys()->get($index, 'invalid'),
+                    ),
                     'message' => $message,
-                ],
-                $messages,
-            ),
-            $errors,
-            array_keys($errors),
-        ));
+                ])
+                ->all())
+            ->all());
+    }
+
+    private static function normaliseRuleCode(mixed $ruleName): string
+    {
+        $short = Str::of(is_string($ruleName) ? $ruleName : 'invalid')
+            ->afterLast('\\')
+            ->before(':')
+            ->snake()
+            ->toString();
+
+        return $short === 'distinct' ? 'duplicate' : $short;
     }
 
     private static function invalidPhone(InvalidPhoneNumberException $exception): JsonResponse

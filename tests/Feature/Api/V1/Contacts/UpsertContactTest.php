@@ -146,3 +146,87 @@ test('POST /api/v1/contacts returns 422 validation_failed for missing name', fun
     expect($details)->toBeArray()
         ->and(collect($details)->pluck('field')->all())->toContain('name');
 });
+
+test('POST /api/v1/contacts rejects within-payload duplicate phones with validation_failed envelope', function (): void {
+    $response = $this->postJson('/api/v1/contacts', [
+        'name' => 'Jane',
+        'phones' => ['+61412345678', '+61412345678'],
+        'emails' => [],
+    ]);
+
+    $response->assertStatus(422)
+        ->assertJsonPath('error.code', 'validation_failed');
+
+    $details = collect($response->json('error.details'));
+
+    expect($details->firstWhere('field', 'phones.1'))->toMatchArray([
+        'field' => 'phones.1',
+        'code' => 'duplicate',
+    ]);
+});
+
+test('POST /api/v1/contacts rejects within-payload duplicate emails (case-insensitive) with validation_failed envelope', function (): void {
+    $response = $this->postJson('/api/v1/contacts', [
+        'name' => 'Jane',
+        'phones' => [],
+        'emails' => ['jane@example.com', 'Jane@Example.com'],
+    ]);
+
+    $response->assertStatus(422)
+        ->assertJsonPath('error.code', 'validation_failed');
+
+    $details = collect($response->json('error.details'));
+
+    expect($details->firstWhere('field', 'emails.1'))->toMatchArray([
+        'field' => 'emails.1',
+        'code' => 'duplicate',
+    ]);
+});
+
+test('PUT /api/v1/contacts/{id} rejects within-payload duplicate phones before the DB write', function (): void {
+    $existing = Contact::factory()
+        ->withPhone('+61400000000')
+        ->create();
+
+    $response = $this->putJson(sprintf('/api/v1/contacts/%d', $existing->id), [
+        'name' => 'Jane',
+        'phones' => ['+61412345678', '+61412345678'],
+        'emails' => [],
+    ]);
+
+    $response->assertStatus(422)
+        ->assertJsonPath('error.code', 'validation_failed');
+
+    $details = collect($response->json('error.details'));
+
+    expect($details->firstWhere('field', 'phones.1'))->toMatchArray([
+        'field' => 'phones.1',
+        'code' => 'duplicate',
+    ]);
+
+    expect($existing->fresh()->phones()->pluck('e164')->all())->toEqual(['+61400000000']);
+});
+
+test('PUT /api/v1/contacts/{id} rejects within-payload duplicate emails before the DB write', function (): void {
+    $existing = Contact::factory()
+        ->withEmail('old@example.com')
+        ->create();
+
+    $response = $this->putJson(sprintf('/api/v1/contacts/%d', $existing->id), [
+        'name' => 'Jane',
+        'phones' => [],
+        'emails' => ['dup@example.com', 'DUP@example.com'],
+    ]);
+
+    $response->assertStatus(422)
+        ->assertJsonPath('error.code', 'validation_failed');
+
+    $details = collect($response->json('error.details'));
+
+    expect($details->firstWhere('field', 'emails.1'))->toMatchArray([
+        'field' => 'emails.1',
+        'code' => 'duplicate',
+    ]);
+
+    expect($existing->fresh()->emails()->pluck('address')->all())->toEqual(['old@example.com']);
+});

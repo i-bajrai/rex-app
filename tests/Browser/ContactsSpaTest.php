@@ -51,6 +51,19 @@ it('maps duplicate-phone server errors inline on create', function (): void {
         ->assertSee('already');
 });
 
+it('rejects within-payload duplicate emails inline before submit', function (): void {
+    $page = visit('/contacts/new');
+
+    $page->type('#name', 'Jane Doe')
+        ->type('input[name="emails.0.value"]', 'dup@example.com')
+        ->click('Add email')
+        ->type('input[name="emails.1.value"]', 'DUP@example.com')
+        ->click('Create contact')
+        ->assertSee('duplicated in your submission');
+
+    expect(Contact::query()->count())->toBe(0);
+});
+
 it('places a call from the show page and renders an outcome panel', function (): void {
     $contact = Contact::factory()
         ->withPhone('+61412345678')

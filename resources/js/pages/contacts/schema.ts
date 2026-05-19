@@ -28,20 +28,63 @@ export const contactFormSchema = z
         phones: z.array(phoneFieldSchema),
         emails: z.array(emailFieldSchema),
     })
-    .refine(
-        (value) => {
-            const nonEmptyPhones = value.phones.filter(
-                (entry) => entry.value !== '',
-            );
-            const nonEmptyEmails = value.emails.filter(
-                (entry) => entry.value !== '',
-            );
-            return nonEmptyPhones.length > 0 || nonEmptyEmails.length > 0;
-        },
-        {
-            message: 'Add at least one phone or email',
-            path: ['name'],
-        },
-    );
+    .superRefine((value, ctx) => {
+        const nonEmptyPhones = value.phones.filter(
+            (entry) => entry.value !== '',
+        );
+        const nonEmptyEmails = value.emails.filter(
+            (entry) => entry.value !== '',
+        );
+        if (nonEmptyPhones.length === 0 && nonEmptyEmails.length === 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Add at least one phone or email',
+                path: ['name'],
+            });
+        }
+
+        flagDuplicateIndices(value.phones.map((entry) => entry.value)).forEach(
+            (index) => {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message:
+                        'This phone number is duplicated in your submission.',
+                    path: ['phones', index, 'value'],
+                    params: { code: 'duplicate' },
+                });
+            },
+        );
+
+        flagDuplicateIndices(
+            value.emails.map((entry) => entry.value.toLowerCase()),
+        ).forEach((index) => {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'This email address is duplicated in your submission.',
+                path: ['emails', index, 'value'],
+                params: { code: 'duplicate' },
+            });
+        });
+    });
+
+function flagDuplicateIndices(values: string[]): number[] {
+    const seen = new Map<string, number>();
+    const duplicates: number[] = [];
+    values.forEach((value, index) => {
+        if (value === '') {
+            return;
+        }
+        const firstIndex = seen.get(value);
+        if (firstIndex === undefined) {
+            seen.set(value, index);
+            return;
+        }
+        if (!duplicates.includes(firstIndex)) {
+            duplicates.push(firstIndex);
+        }
+        duplicates.push(index);
+    });
+    return duplicates;
+}
 
 export type ContactFormValues = z.infer<typeof contactFormSchema>;

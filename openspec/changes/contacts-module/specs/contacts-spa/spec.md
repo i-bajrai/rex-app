@@ -30,6 +30,11 @@ The system SHALL validate phone numbers and email addresses on the client using 
 - **WHEN** the API returns `422` with a domain code (e.g. `contact.phone.duplicate`) and the offending value in `details`
 - **THEN** the SPA SHALL display the message inline next to the input whose value matches `details.phone` (or `details.email`), not as an unscoped page-level toast
 
+#### Scenario: Client rejects within-payload duplicates before submit
+- **WHEN** the user submits the contact form with the same phone E164 (or the same email after case normalisation) in two or more rows of the same submission
+- **THEN** the SPA SHALL display an inline `duplicate` error on each repeated row and block the submit until the user resolves them
+- **AND** if a within-payload duplicate slips past the client and the server returns the field-level validation envelope (`field=phones.N` or `field=emails.N`, `code=duplicate`), the SPA SHALL map those errors inline to the corresponding row inputs via the existing `mapServerErrorsToFields` helper
+
 ### Requirement: Place-call UI handles all gateway outcomes
 The system SHALL display a distinct UI state for every possible outcome returned by the place-call endpoint, so the operator can tell connected calls from any of the failure modes without inspecting the network response.
 

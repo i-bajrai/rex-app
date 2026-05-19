@@ -94,3 +94,13 @@
 - [x] 12.4 README — "Running locally": `composer install`, `bun install`, `.env`, migrate, `composer dev`, test commands
 - [x] 12.5 Open the PR from `feat/contacts-module` against `main` on `i-bajrai/rex-app`; PR body links the OpenSpec change directory
 - [ ] 12.6 `openspec archive contacts-module` after the PR is merged
+
+## 13. Within-payload duplicate validation
+
+- [x] 13.1 Add Laravel `distinct` rule on `phones.*` and `distinct:ignore_case` on `emails.*` in `UpsertContactRequest`, with custom human-readable messages
+- [x] 13.2 Extend `ApiErrorEnvelope::buildValidationDetails` to derive each detail's `code` from the failed Laravel rule short-name (`Distinct` -> `duplicate`) using `$exception->validator->failed()` instead of hardcoding `invalid`
+- [x] 13.3 Backend feature tests: POST + PUT with duplicate phones AND duplicate emails (case-insensitive) assert 422 `validation_failed` with `details[]` containing `field=phones.N` / `emails.N` and `code=duplicate`; PUT tests also assert the DB row is unchanged (request never reaches `UpsertContact::execute`)
+- [x] 13.4 Frontend zod schema: `superRefine` flags duplicate phones (exact) and duplicate emails (case-insensitive after lowercasing) within the form arrays; each duplicate row gets an inline error before submit
+- [x] 13.5 Browser test: typing the same email twice surfaces the inline duplicate error and blocks any network call (`Contact::count()` stays at 0)
+- [x] 13.6 `composer test` green (143 tests, 469 assertions, type coverage 100%, code coverage 100%, pint + rector + phpstan + vp fmt clean)
+- [x] 13.7 `bun run build` green
