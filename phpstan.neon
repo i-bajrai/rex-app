@@ -12,6 +12,7 @@ parameters:
         - database
         - public
         - routes
+        - src
 
 
     level: max

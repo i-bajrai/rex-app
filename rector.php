@@ -39,6 +39,7 @@ return RectorConfig::configure()
         __DIR__.'/database',
         __DIR__.'/public',
         __DIR__.'/routes',
+        __DIR__.'/src',
         __DIR__.'/tests',
     ])
     ->withSkip([
