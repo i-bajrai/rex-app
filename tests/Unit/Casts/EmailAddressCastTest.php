@@ -39,8 +39,8 @@ test('rejects an invalid raw string when hydrating from the column', function ()
     try {
         $cast->get(new ContactEmail, 'address', 'not-an-email', []);
         $this->fail('expected InvalidEmailAddressException');
-    } catch (InvalidEmailAddressException $exception) {
-        expect($exception->errorCode)->toBe('invalid');
+    } catch (InvalidEmailAddressException $invalidEmailAddressException) {
+        expect($invalidEmailAddressException->errorCode)->toBe('invalid');
     }
 });
 
@@ -50,7 +50,29 @@ test('rejects an invalid raw string when serialising for storage', function (): 
     try {
         $cast->set(new ContactEmail, 'address', 'not-an-email', []);
         $this->fail('expected InvalidEmailAddressException');
-    } catch (InvalidEmailAddressException $exception) {
-        expect($exception->errorCode)->toBe('invalid');
+    } catch (InvalidEmailAddressException $invalidEmailAddressException) {
+        expect($invalidEmailAddressException->errorCode)->toBe('invalid');
+    }
+});
+
+test('rejects non-string hydration values', function (): void {
+    $cast = new EmailAddressCast;
+
+    try {
+        $cast->get(new ContactEmail, 'address', 12345, []);
+        $this->fail('expected InvalidEmailAddressException');
+    } catch (InvalidEmailAddressException $invalidEmailAddressException) {
+        expect($invalidEmailAddressException->errorCode)->toBe('invalid');
+    }
+});
+
+test('rejects non-string serialisation values', function (): void {
+    $cast = new EmailAddressCast;
+
+    try {
+        $cast->set(new ContactEmail, 'address', 12345, []);
+        $this->fail('expected InvalidEmailAddressException');
+    } catch (InvalidEmailAddressException $invalidEmailAddressException) {
+        expect($invalidEmailAddressException->errorCode)->toBe('invalid');
     }
 });

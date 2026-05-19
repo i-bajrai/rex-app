@@ -16,6 +16,6 @@ final readonly class ContactSearchCriteria
 
     public function isEmpty(): bool
     {
-        return $this->name === null && $this->phone === null && $this->emailDomain === null;
+        return $this->name === null && ! $this->phone instanceof PhoneNumber && $this->emailDomain === null;
     }
 }

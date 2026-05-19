@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('contact_id')->constrained()->cascadeOnDelete();
             $table->string('address')->unique();
             $table->string('address_domain')
-                ->storedAs('substr(address, instr(address, \'@\') + 1)')
+                ->storedAs("substr(address, instr(address, '@') + 1)")
                 ->index();
             $table->timestamps();
         });

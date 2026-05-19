@@ -13,7 +13,7 @@ final class InvalidEmailAddressException extends DomainException
         public readonly string $value,
         string $message = '',
     ) {
-        parent::__construct($message === '' ? "Email address failed validation: {$errorCode}." : $message);
+        parent::__construct($message === '' ? sprintf('Email address failed validation: %s.', $errorCode) : $message);
     }
 
     public static function invalid(string $value): self
@@ -21,7 +21,7 @@ final class InvalidEmailAddressException extends DomainException
         return new self(
             errorCode: 'invalid',
             value: $value,
-            message: "Email address [{$value}] is not RFC-valid.",
+            message: sprintf('Email address [%s] is not RFC-valid.', $value),
         );
     }
 

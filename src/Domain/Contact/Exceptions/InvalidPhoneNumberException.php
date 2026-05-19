@@ -20,7 +20,7 @@ final class InvalidPhoneNumberException extends DomainException
         public readonly array $supportedRegions = self::SUPPORTED_REGIONS,
         string $message = '',
     ) {
-        parent::__construct($message === '' ? "Phone number [{$value}] failed validation: {$errorCode}." : $message);
+        parent::__construct($message === '' ? sprintf('Phone number [%s] failed validation: %s.', $value, $errorCode) : $message);
     }
 
     public static function notE164(string $value): self
@@ -28,7 +28,7 @@ final class InvalidPhoneNumberException extends DomainException
         return new self(
             errorCode: 'not_e164',
             value: $value,
-            message: "Phone number [{$value}] is not in E.164 format.",
+            message: sprintf('Phone number [%s] is not in E.164 format.', $value),
         );
     }
 
@@ -37,7 +37,7 @@ final class InvalidPhoneNumberException extends DomainException
         return new self(
             errorCode: 'unsupported_region',
             value: $value,
-            message: "Phone number [{$value}] is not from a supported region.",
+            message: sprintf('Phone number [%s] is not from a supported region.', $value),
         );
     }
 
@@ -46,7 +46,7 @@ final class InvalidPhoneNumberException extends DomainException
         return new self(
             errorCode: 'malformed',
             value: $value,
-            message: "Phone number [{$value}] contains non-digit characters.",
+            message: sprintf('Phone number [%s] contains non-digit characters.', $value),
         );
     }
 }

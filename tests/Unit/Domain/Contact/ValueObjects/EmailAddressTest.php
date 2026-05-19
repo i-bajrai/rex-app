@@ -15,8 +15,8 @@ test('rejects an RFC invalid address', function (): void {
     try {
         new EmailAddress('not-an-email');
         $this->fail('expected InvalidEmailAddressException');
-    } catch (InvalidEmailAddressException $exception) {
-        expect($exception->errorCode)->toBe('invalid');
+    } catch (InvalidEmailAddressException $invalidEmailAddressException) {
+        expect($invalidEmailAddressException->errorCode)->toBe('invalid');
     }
 });
 
@@ -27,8 +27,8 @@ test('rejects an address longer than 254 characters', function (): void {
     try {
         new EmailAddress($address);
         $this->fail('expected InvalidEmailAddressException');
-    } catch (InvalidEmailAddressException $exception) {
-        expect($exception->errorCode)->toBe('too_long');
+    } catch (InvalidEmailAddressException $invalidEmailAddressException) {
+        expect($invalidEmailAddressException->errorCode)->toBe('too_long');
     }
 });
 

@@ -13,11 +13,9 @@ final readonly class PhoneNumber implements Stringable
 
     private const string PATTERN_AU_NZ = '/^\+(?<region>61|64)\d{8,10}$/';
 
-    /** @var array<string, string> */
-    private const array REGION_BY_PREFIX = [
-        '61' => 'AU',
-        '64' => 'NZ',
-    ];
+    private const string REGION_AU = 'AU';
+
+    private const string REGION_NZ = 'NZ';
 
     public string $value;
 
@@ -29,11 +27,8 @@ final readonly class PhoneNumber implements Stringable
         $this->guardUnsupportedRegion($value);
         $this->guardE164ForSupportedRegion($value);
 
-        $matches = [];
-        preg_match(self::PATTERN_AU_NZ, $value, $matches);
-
         $this->value = $value;
-        $this->region = self::REGION_BY_PREFIX[$matches['region']];
+        $this->region = str_starts_with($value, '+61') ? self::REGION_AU : self::REGION_NZ;
     }
 
     public function __toString(): string

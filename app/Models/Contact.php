@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\ContactFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read string $name
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ContactPhone> $phones
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ContactEmail> $emails
+ * @property-read Collection<int, ContactPhone> $phones
+ * @property-read Collection<int, ContactEmail> $emails
  * @property-read ContactPhone|null $primaryPhone
  */
 final class Contact extends Model

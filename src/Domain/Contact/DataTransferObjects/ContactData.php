@@ -42,7 +42,7 @@ final readonly class ContactData
             if (! $value instanceof $expected) {
                 $given = get_debug_type($value);
                 throw new TypeError(
-                    "ContactData::\${$field} must be a list of {$expected}, got {$given}."
+                    sprintf('ContactData::$%s must be a list of %s, got %s.', $field, $expected, $given)
                 );
             }
         });

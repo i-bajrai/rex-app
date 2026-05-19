@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Casts;
 
+use Domain\Contact\Exceptions\InvalidEmailAddressException;
 use Domain\Contact\ValueObjects\EmailAddress;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +19,11 @@ final class EmailAddressCast implements CastsAttributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): EmailAddress
     {
-        return new EmailAddress((string) $value);
+        if (! is_string($value)) {
+            throw InvalidEmailAddressException::invalid(get_debug_type($value));
+        }
+
+        return new EmailAddress($value);
     }
 
     /**
@@ -26,8 +31,14 @@ final class EmailAddressCast implements CastsAttributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): string
     {
-        $email = $value instanceof EmailAddress ? $value : new EmailAddress((string) $value);
+        if ($value instanceof EmailAddress) {
+            return (string) $value;
+        }
 
-        return (string) $email;
+        if (! is_string($value)) {
+            throw InvalidEmailAddressException::invalid(get_debug_type($value));
+        }
+
+        return (string) new EmailAddress($value);
     }
 }
