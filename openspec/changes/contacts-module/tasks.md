@@ -88,9 +88,9 @@
 
 ## 12. Documentation & submission
 
-- [ ] 12.1 README — "Architecture" section: `src/Domain/`, per-aggregate rule, test-first cadence used to build this module
-- [ ] 12.2 README — "Concessions" section: hand-rolled E164, `LIKE`-based search, no soft-delete / audit, no call log persisted, deterministic fake telephony
-- [ ] 12.3 README — "AI tooling" section: OpenSpec (proposal → design → spec → tasks) + Claude Code test-first cadence; what AI did vs what I checked
-- [ ] 12.4 README — "Running locally": `composer install`, `bun install`, `.env`, migrate, `composer dev`, test commands
-- [ ] 12.5 Open the PR from `feat/contacts-module` against `main` on `i-bajrai/rex-app`; PR body links the OpenSpec change directory
+- [x] 12.1 README — "Architecture" section: `src/Domain/`, per-aggregate rule, test-first cadence used to build this module
+- [x] 12.2 README — "Concessions" section: hand-rolled E164, `LIKE`-based search, no soft-delete / audit, no call log persisted, deterministic fake telephony
+- [x] 12.3 README — "AI tooling" section: OpenSpec (proposal → design → spec → tasks) + Claude Code test-first cadence; what AI did vs what I checked
+- [x] 12.4 README — "Running locally": `composer install`, `bun install`, `.env`, migrate, `composer dev`, test commands
+- [x] 12.5 Open the PR from `feat/contacts-module` against `main` on `i-bajrai/rex-app`; PR body links the OpenSpec change directory
 - [ ] 12.6 `openspec archive contacts-module` after the PR is merged
