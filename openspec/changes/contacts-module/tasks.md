@@ -78,13 +78,13 @@
 
 ## 11. Architecture & quality gates
 
-- [ ] 11.1 `tests/Unit/Arch/ContactDomainTest.php` — pins `Domain\Contact\` to `Actions|DataTransferObjects|ValueObjects|Exceptions|Enums|Contracts|Gateways` sub-namespaces only
-- [ ] 11.2 ArchTest pinning `App\Http\Controllers\Api\V1\*` away from direct `App\Models\Contact*` query references
-- [ ] 11.3 ArchTest pinning `App\Jobs\*` (and any other async/scheduled entry point) away from direct `App\Models\Contact*` query references — must dispatch through `Domain\Contact\Actions\*`
-- [ ] 11.4 `vendor/bin/pint --format agent` — clean
-- [ ] 11.5 `vendor/bin/phpstan analyse` — clean at level max
-- [ ] 11.6 `vendor/bin/rector process --dry-run` — clean
-- [ ] 11.7 `php artisan test --compact` — full suite green
+- [x] 11.1 `tests/Unit/Arch/ContactDomainTest.php` — pins `Domain\Contact\` to `Actions|DataTransferObjects|ValueObjects|Exceptions|Enums|Contracts|Gateways` sub-namespaces only
+- [x] 11.2 ArchTest pinning `App\Http\Controllers\Api\V1\*` away from direct `App\Models\Contact*` query references
+- [x] 11.3 ArchTest pinning `App\Jobs\*` (and any other async/scheduled entry point) away from direct `App\Models\Contact*` query references — must dispatch through `Domain\Contact\Actions\*`
+- [x] 11.4 `vendor/bin/pint --format agent` — clean
+- [x] 11.5 `vendor/bin/phpstan analyse` — clean at level max
+- [x] 11.6 `vendor/bin/rector process --dry-run` — clean
+- [x] 11.7 `php artisan test --compact` — full suite green
 
 ## 12. Documentation & submission
 
