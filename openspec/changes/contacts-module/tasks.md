@@ -104,3 +104,11 @@
 - [x] 13.5 Browser test: typing the same email twice surfaces the inline duplicate error and blocks any network call (`Contact::count()` stays at 0)
 - [x] 13.6 `composer test` green (143 tests, 469 assertions, type coverage 100%, code coverage 100%, pint + rector + phpstan + vp fmt clean)
 - [x] 13.7 `bun run build` green
+
+## 14. Call outcome envelope fix
+
+- [x] 14.1 `resources/js/api/contacts.ts` — change `placeCall` to return `Promise<{data: CallOutcome}>` so it matches the `{data: T}` envelope convention used by sibling fetchers (`getContact`, `createContact`, `updateContact`)
+- [x] 14.2 `resources/js/pages/contacts/Show.tsx` — unwrap `response.data` in the `callMutation.onSuccess` callback so the outcome panel renders the human-readable status label instead of blank
+- [x] 14.3 Browser test extension in `tests/Browser/ContactsSpaTest.php`: bind a stub `TelephonyGateway` returning `CallStatus::NoAnswer`, click the `@place-call` testid, and assert the rendered "No answer" label and provider message are visible
+- [x] 14.4 `composer test` green
+- [x] 14.5 `bun run build` green

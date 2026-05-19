@@ -3,6 +3,10 @@
 declare(strict_types=1);
 
 use App\Models\Contact;
+use Domain\Contact\Contracts\TelephonyGateway;
+use Domain\Contact\DataTransferObjects\CallOutcome;
+use Domain\Contact\Enums\CallStatus;
+use Domain\Contact\ValueObjects\PhoneNumber;
 
 it('renders the empty state on the list when no contacts exist', function (): void {
     $page = visit('/contacts');
@@ -69,11 +73,21 @@ it('places a call from the show page and renders an outcome panel', function ():
         ->withPhone('+61412345678')
         ->create(['name' => 'Caller Target']);
 
+    $this->app->instance(TelephonyGateway::class, new readonly class implements TelephonyGateway
+    {
+        public function call(PhoneNumber $to): CallOutcome
+        {
+            return new CallOutcome(CallStatus::NoAnswer, null, 'No answer from destination.');
+        }
+    });
+
     $page = visit(sprintf('/contacts/%d', $contact->id));
 
     $page->assertSee('Caller Target')
         ->assertSee('+61412345678')
-        ->click('Place Call');
+        ->click('@place-call')
+        ->assertSee('No answer')
+        ->assertSee('No answer from destination.');
 });
 
 it('disables the call button when the contact has no phones', function (): void {

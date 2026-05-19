@@ -129,7 +129,8 @@ export function ContactsShow(): JSX.Element {
     const callMutation = useMutation({
         mutationFn: () => placeCall(id),
         onMutate: () => setCallState({ kind: 'pending' }),
-        onSuccess: (outcome) => setCallState({ kind: 'outcome', outcome }),
+        onSuccess: (response) =>
+            setCallState({ kind: 'outcome', outcome: response.data }),
         onError: (error: Error) => {
             if (error instanceof ApiError) {
                 if (error.code === 'contact.call.no_phone') {

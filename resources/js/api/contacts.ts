@@ -176,8 +176,8 @@ export function deleteContact(id: number): Promise<void> {
     return request<void>(`/api/v1/contacts/${id}`, { method: 'DELETE' });
 }
 
-export function placeCall(id: number): Promise<CallOutcome> {
-    return request<CallOutcome>(`/api/v1/contacts/${id}/call`, {
+export function placeCall(id: number): Promise<{ data: CallOutcome }> {
+    return request<{ data: CallOutcome }>(`/api/v1/contacts/${id}/call`, {
         method: 'POST',
     });
 }
