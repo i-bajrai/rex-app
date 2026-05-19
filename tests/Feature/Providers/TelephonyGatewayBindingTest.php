@@ -12,7 +12,7 @@ test('telephony gateway binding varies outcomes across separate container resolu
         ->map(function (): CallStatus {
             $this->app->forgetInstance(TelephonyGateway::class);
 
-            return app(TelephonyGateway::class)->call(new PhoneNumber('+61412345678'))->status;
+            return resolve(TelephonyGateway::class)->call(new PhoneNumber('+61412345678'))->status;
         })
         ->unique()
         ->values();

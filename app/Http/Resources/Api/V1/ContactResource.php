@@ -35,8 +35,8 @@ final class ContactResource extends JsonResource
                 'emails',
                 fn () => $contact->emails->map(fn (ContactEmail $email): string => (string) $email->address)->values()->all(),
             ),
-            'phones_count' => $this->whenCounted('phones', fn (int $count): int => $count),
-            'emails_count' => $this->whenCounted('emails', fn (int $count): int => $count),
+            'phones_count' => $this->whenCounted('phones'),
+            'emails_count' => $this->whenCounted('emails'),
         ];
     }
 }

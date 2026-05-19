@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Contact\DataTransferObjects;
 
+use App\Support\TypeDescription;
 use Domain\Contact\ValueObjects\EmailAddress;
 use Domain\Contact\ValueObjects\PhoneNumber;
 use Illuminate\Support\Collection;
@@ -40,10 +41,12 @@ final readonly class ContactData
     {
         Collection::make($values)->each(function (mixed $value) use ($expected, $field): void {
             if (! $value instanceof $expected) {
-                $given = get_debug_type($value);
-                throw new TypeError(
-                    sprintf('ContactData::$%s must be a list of %s, got %s.', $field, $expected, $given)
-                );
+                throw new TypeError(sprintf(
+                    'ContactData::$%s must be a list of %s, got %s.',
+                    $field,
+                    $expected,
+                    TypeDescription::of($value),
+                ));
             }
         });
     }

@@ -43,6 +43,14 @@ test('rejects raw string emails at the boundary', function (): void {
     ))->toThrow(TypeError::class);
 });
 
+test('rejects wrong-class objects in the phones list', function (): void {
+    expect(fn (): ContactData => new ContactData(
+        name: 'Jane',
+        phones: [new EmailAddress('jane@example.com')],
+        emails: [],
+    ))->toThrow(TypeError::class, 'must be a list of '.PhoneNumber::class.', got '.EmailAddress::class);
+});
+
 test('allows empty phone and email arrays at construction', function (): void {
     $dto = new ContactData(name: 'Solo', phones: [], emails: []);
 

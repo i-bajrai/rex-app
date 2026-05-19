@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Casts;
 
+use App\Support\TypeDescription;
 use Domain\Contact\Exceptions\InvalidPhoneNumberException;
 use Domain\Contact\ValueObjects\PhoneNumber;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
@@ -20,7 +21,7 @@ final class PhoneNumberCast implements CastsAttributes
     public function get(Model $model, string $key, mixed $value, array $attributes): PhoneNumber
     {
         if (! is_string($value)) {
-            throw InvalidPhoneNumberException::malformed(get_debug_type($value));
+            throw InvalidPhoneNumberException::malformed(TypeDescription::of($value));
         }
 
         return new PhoneNumber($value);
@@ -36,7 +37,7 @@ final class PhoneNumberCast implements CastsAttributes
         }
 
         if (! is_string($value)) {
-            throw InvalidPhoneNumberException::malformed(get_debug_type($value));
+            throw InvalidPhoneNumberException::malformed(TypeDescription::of($value));
         }
 
         return (string) new PhoneNumber($value);

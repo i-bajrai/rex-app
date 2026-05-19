@@ -58,6 +58,19 @@ Trade-offs sized for the exercise — each has an upgrade path at the seam.
 - **Real telephony adapter.** Bind a Twilio/MessageMedia implementation of `TelephonyGateway` in `AppServiceProvider`; no other file changes.
 - **Friendly Artisan errors.** Domain exceptions (e.g. `DuplicateContactPhoneException`) surface in CLI commands as raw stack traces today. Catching them in `App\Console\Commands\Contact\*` and rendering via `$this->error(...)` would mirror the HTTP error envelope's UX.
 
+## Foundation
+
+Bootstrapped on **[nunomaduro/laravel-starter-kit](https://github.com/nunomaduro/laravel-starter-kit)** — preconfigured quality gates that fail-fast on AI-generated mistakes:
+
+- **Pest type coverage 100% + line coverage exactly 100%** (not `--min`, so orphaned tests fail CI).
+- **PHPStan max via Larastan** — catches framework-shaped mistakes pure PHP linters miss.
+- **Rector + `driftingly/rector-laravel`** — keeps code on current PHP/Laravel idioms.
+- **Pint** — formatting decided, not debated.
+- **`nunomaduro/essentials`** — strict Eloquent defaults globally (`preventLazyLoading`, `preventSilentlyDiscardingAttributes`, immutable dates).
+- **`roave/security-advisories`** — `composer install` fails on any dep with a known CVE.
+
+`composer test` chains all six; nothing landed on this branch without it green.
+
 ## AI tooling and oversight
 
 Built with **OpenSpec** (proposal → design → spec → tasks) for thinking and **Claude Code** for the implementation cadence (test-first, per sub-section in `tasks.md`).
