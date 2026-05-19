@@ -30,6 +30,11 @@ The system SHALL validate phone numbers and email addresses on the client using 
 - **WHEN** the API returns `422` with a domain code (e.g. `contact.phone.duplicate`) and the offending value in `details`
 - **THEN** the SPA SHALL display the message inline next to the input whose value matches `details.phone` (or `details.email`), not as an unscoped page-level toast
 
+#### Scenario: Client rejects within-payload duplicates before submit
+- **WHEN** the user submits the contact form with the same phone E164 (or the same email after case normalisation) in two or more rows of the same submission
+- **THEN** the SPA SHALL display an inline `duplicate` error on each repeated row and block the submit until the user resolves them
+- **AND** if a within-payload duplicate slips past the client and the server returns the field-level validation envelope (`field=phones.N` or `field=emails.N`, `code=duplicate`), the SPA SHALL map those errors inline to the corresponding row inputs via the existing `mapServerErrorsToFields` helper
+
 ### Requirement: Place-call UI handles all gateway outcomes
 The system SHALL display a distinct UI state for every possible outcome returned by the place-call endpoint, so the operator can tell connected calls from any of the failure modes without inspecting the network response.
 
@@ -50,15 +55,15 @@ The system SHALL display a distinct UI state for every possible outcome returned
 - **THEN** the SPA SHALL show "Try again in Ns" and re-enable the call button after that many seconds
 
 ### Requirement: SPA list and search interactions
-The system SHALL render the list and search endpoints as a single screen with a search affordance, so an operator can find a contact by name, full phone, or email domain without leaving the list view.
+The system SHALL render the list and search endpoints as a single screen with a search affordance, so an operator can find a contact by name, full phone, or exact email without leaving the list view.
 
 #### Scenario: Default list view
 - **WHEN** the user opens `/contacts` with no search input
 - **THEN** the SPA SHALL render the list endpoint's results (newest first, capped at the server's configured limit) with each row showing name plus phone/email counts
 
 #### Scenario: Search input dispatches to the search endpoint
-- **WHEN** the user enters a value in the name, phone, or email-domain search input
-- **THEN** the SPA SHALL call `/api/v1/contacts/search` with the corresponding query parameter; multiple inputs MUST be combined as AND on the same request
+- **WHEN** the user enters a value in the name, phone, or email search input
+- **THEN** the SPA SHALL call `/api/v1/contacts/search` with the corresponding query parameter (`name`, `phone`, or `email`); multiple inputs MUST be combined as AND on the same request
 
 #### Scenario: Empty search results render an empty state, not an error
 - **WHEN** the search endpoint returns `200` with `{data: []}`
