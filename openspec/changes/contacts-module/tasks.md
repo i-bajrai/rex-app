@@ -112,3 +112,11 @@
 - [x] 14.3 Browser test extension in `tests/Browser/ContactsSpaTest.php`: bind a stub `TelephonyGateway` returning `CallStatus::NoAnswer`, click the `@place-call` testid, and assert the rendered "No answer" label and provider message are visible
 - [x] 14.4 `composer test` green
 - [x] 14.5 `bun run build` green
+
+## 15. Root redirect to /contacts
+
+- [x] 15.1 `routes/web.php` — replace welcome-view at `/` with `Route::redirect('/', '/contacts')` (302); drop the now-unused `View` import
+- [x] 15.2 Delete `resources/views/welcome.blade.php` and `tests/Browser/WelcomeTest.php` — no longer part of the contacts SPA flow
+- [x] 15.3 `tests/Feature/RootRedirectTest.php` — assert `GET /` returns `302` with `Location: /contacts`
+- [x] 15.4 Browser test: `visit('/')` lands at `/contacts` with the contacts page rendered
+- [x] 15.5 `composer test` green

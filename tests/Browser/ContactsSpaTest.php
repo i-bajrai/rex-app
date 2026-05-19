@@ -90,6 +90,13 @@ it('places a call from the show page and renders an outcome panel', function ():
         ->assertSee('No answer from destination.');
 });
 
+it('redirects from / to /contacts in the browser', function (): void {
+    $page = visit('/');
+
+    $page->assertPathIs('/contacts')
+        ->assertSee('Contacts');
+});
+
 it('disables the call button when the contact has no phones', function (): void {
     $contact = Contact::factory()
         ->withEmail('alex@example.com')
