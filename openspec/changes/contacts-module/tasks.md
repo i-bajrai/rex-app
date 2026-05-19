@@ -67,14 +67,14 @@
 
 ## 10. React SPA frontend (UI verified via real-browser smoke test per starter convention)
 
-- [ ] 10.1 Add React + react-router + TanStack Query + react-hook-form + zod; `bun install`
-- [ ] 10.2 `resources/views/app.blade.php` SPA shell
-- [ ] 10.3 `resources/js/app.tsx` — router + query client + layout
-- [ ] 10.4 `resources/js/api/contacts.ts` — typed fetchers parsing the `{error: {code, message, details}}` envelope; `mapServerErrorsToFields(details)` helper that turns `details[].field` dot-paths into form-field errors for react-hook-form
-- [ ] 10.5 `resources/js/pages/contacts/Index.tsx` — single-screen list + search affordances (name / phone / email-domain inputs combined as AND); empty results render a scoped empty state, not an error
-- [ ] 10.6 `resources/js/pages/contacts/Show.tsx` — detail + "Place Call" button + outcome panel that distinctly renders `connected` (with duration), `no_answer` / `busy` / `failed` / `invalid_number` (with provider message), `contact.call.no_phone` (disabled-state explanation), and `contact.call.rate_limited` (countdown using `details.retry_after_seconds`)
-- [ ] 10.7 `resources/js/pages/contacts/Form.tsx` — shared create/edit with zod schema mirroring backend rules (E164 AU/NZ, RFC email, 254-char cap); on submit failure, route validation errors through `mapServerErrorsToFields` so each `details[].field` lands against the right input
-- [ ] 10.8 `composer dev` smoke-test in a real browser per [[feedback_smoke_test_ui_in_browser]]: list → search (verify empty state) → create (verify zod inline error on `0412345678`) → trigger duplicate-phone server error (verify inline placement) → call (verify each outcome variant including rate-limited countdown if reachable) → check DevTools console clean
+- [x] 10.1 Add React + react-router + TanStack Query + react-hook-form + zod; `bun install`
+- [x] 10.2 `resources/views/app.blade.php` SPA shell
+- [x] 10.3 `resources/js/app.tsx` — router + query client + layout
+- [x] 10.4 `resources/js/api/contacts.ts` — typed fetchers parsing the `{error: {code, message, details}}` envelope; `mapServerErrorsToFields(details)` helper that turns `details[].field` dot-paths into form-field errors for react-hook-form
+- [x] 10.5 `resources/js/pages/contacts/Index.tsx` — single-screen list + search affordances (name / phone / email-domain inputs combined as AND); empty results render a scoped empty state, not an error
+- [x] 10.6 `resources/js/pages/contacts/Show.tsx` — detail + "Place Call" button + outcome panel that distinctly renders `connected` (with duration), `no_answer` / `busy` / `failed` / `invalid_number` (with provider message), `contact.call.no_phone` (disabled-state explanation), and `contact.call.rate_limited` (countdown using `details.retry_after_seconds`)
+- [x] 10.7 `resources/js/pages/contacts/Form.tsx` — shared create/edit with zod schema mirroring backend rules (E164 AU/NZ, RFC email, 254-char cap); on submit failure, route validation errors through `mapServerErrorsToFields` so each `details[].field` lands against the right input
+- [x] 10.8 `composer dev` smoke-test in a real browser per [[feedback_smoke_test_ui_in_browser]]: list → search (verify empty state) → create (verify zod inline error on `0412345678`) → trigger duplicate-phone server error (verify inline placement) → call (verify each outcome variant including rate-limited countdown if reachable) → check DevTools console clean
 
 ## 11. Architecture & quality gates
 
